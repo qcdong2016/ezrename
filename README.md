@@ -14,13 +14,14 @@
 ## functions
     upper   func(string)string
     lower   func(string)string
-    repeat  func(string)string
-    replace func(string)string
-    trim    func(string)string
-    date    func(string)string
-    format  func(string, ...)string
+    repeat  func(s string, count int)string
+    replace func(s, old, new string, n int)string
+    trim    func(s string, cutset string)string
+    format  func(format string, ...)string
     rand    func()int
-    randstr func(int)string
+    randstr func(length int)string
+    date    func(format string)string
+help of [date](https://github.com/metakeule/fmtdate)
 
 ## vars
     name    a/b/cc.txt -> cc.txt
