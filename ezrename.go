@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -63,6 +64,7 @@ func setEnv(env *vm.Env, file *FileInfo) {
 	env.Define("ext", filepath.Ext(file.Name))
 	env.Define("dir", filepath.Base(filepath.Dir(file.FullName)))
 	env.Define("index", file.Index)
+	env.Define("isdir", file.Info.IsDir())
 }
 
 type FileInfo struct {
@@ -79,6 +81,7 @@ var config = struct {
 	Filter     string
 	TargetPath string
 	Formula    string
+	Sort       string
 }{}
 
 func ListDir(dirPth string) (files []*FileInfo, err error) {
@@ -102,9 +105,61 @@ func ListDir(dirPth string) (files []*FileInfo, err error) {
 }
 
 func do() {
-	files, _ := ListDir(config.TargetPath)
+	files_ori, _ := ListDir(config.TargetPath)
 
 	env := NewEnv()
+
+	files := []*FileInfo{}
+	if config.Filter != "" {
+		for _, file := range files_ori {
+			setEnv(env, file)
+			val, err := env.Execute(config.Filter)
+			if err != nil {
+				log.Fatalf("syntax error [filter]:%s", err)
+			}
+			switch val.(type) {
+			case bool:
+				if val.(bool) {
+					files = append(files, file)
+				}
+			default:
+				log.Fatalf("filter should return a bool")
+			}
+		}
+	} else {
+		files = files_ori
+	}
+
+	if config.Sort != "" {
+		sort.Slice(files, func(a, b int) bool {
+			setEnv(env, files[a])
+			va, err := env.Execute(config.Sort)
+			if err != nil {
+				log.Fatalf("runing sort script error: [%s]%s", files[a].FullName, err)
+			}
+
+			setEnv(env, files[b])
+			vb, err := env.Execute(config.Sort)
+			if err != nil {
+				log.Fatalf("runing sort script error: [%s]%s", files[b].FullName, err)
+			}
+
+			switch va.(type) {
+			case string:
+			default:
+				log.Fatalf("sort script shout return a string: [%s]", files[a].FullName)
+			}
+
+			switch vb.(type) {
+			case string:
+			default:
+				log.Fatalf("sort script shout return a string: [%s]", files[b].FullName)
+			}
+
+			return va.(string) < vb.(string)
+		})
+	}
+
 	for index, file := range files {
 		file.Index = index
 		setEnv(env, file)
@@ -144,6 +199,7 @@ func main() {
 	config.TargetPath, _ = os.Getwd()
 
 	var cmd = &cobra.Command{
+		Use: "{script}",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
 				cmd.Usage()
@@ -155,8 +211,9 @@ func main() {
 		},
 	}
 
-	cmd.Flags().BoolVarP(&config.Test, "test", "t", false, "just test,not run.")
-	cmd.Flags().StringVarP(&config.Filter, "filter", "f", "", "files filter.")
+	cmd.Flags().BoolVarP(&config.Test, "test", "t", false, "just print, not run.")
+	cmd.Flags().StringVarP(&config.Filter, "filter", "f", "", "files filter script. bool")
+	cmd.Flags().StringVarP(&config.Sort, "sort", "s", "", "files sort script. string")
 	cmd.Flags().StringVarP(&config.TargetPath, "path", "p", config.TargetPath, "target path.")
 	cmd.Execute()
 }
