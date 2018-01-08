@@ -1,8 +1,8 @@
 # ezrename
-`ezrename` is a command-line rename tool written in [Go](https://golang.org/). `ezrename` using [anko](https://github.com/mattn/anko) as script. Yes, you can coding in your filename. 
+`ezrename` is a command-line rename tool written in [Go](https://golang.org/). `ezrename` using [anko](https://github.com/mattn/anko) script as expression. That powerful and flexible.
 
 ## UseAge
-    ezrename --path=./ {script}some_const_text{script}{script}
+    ezrename --path=./ --sort=script --filter=script  {script}some_const_text{script}{script}
 
 ## example
 ![preview][]
