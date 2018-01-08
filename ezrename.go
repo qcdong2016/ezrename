@@ -65,6 +65,7 @@ func setEnv(env *vm.Env, file *FileInfo) {
 	env.Define("dir", filepath.Base(filepath.Dir(file.FullName)))
 	env.Define("index", file.Index)
 	env.Define("isdir", file.Info.IsDir())
+	env.Define("isfile", !file.Info.IsDir())
 }
 
 type FileInfo struct {

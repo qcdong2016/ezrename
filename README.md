@@ -5,11 +5,8 @@
     ezrename --path=./ {script}some_const_text{script}{script}
 
 ## example
-    ezrename --path=test {date('YYMM')}/{index+1}/{base[0:2]}_{randstr(3)}{ext} 
-    test/somedir                         => test/1801/1/so_Itc
-    test/00_1.txt                        => test/1801/2/00_WZ4.txt
-    test/00_2.txt                        => test/1801/3/00_26z.txt
-    test/01_3.txt                        => test/1801/4/01_Aq1.txt
+![preview][]
+
 
 ## functions
     upper   func(string)string
@@ -30,3 +27,6 @@ help of [date](https://github.com/metakeule/fmtdate)
     ext     a/b/cc.txt -> .txt
     dir     a/b/cc.txt -> b
     index   index number 
+    isdir
+
+[preview]: preview.jpg
